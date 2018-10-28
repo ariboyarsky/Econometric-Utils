@@ -13,3 +13,15 @@ demean <- function(dta){
   }
   return(demeaned)
 }
+
+# scale by sd
+sd_scale <- function(dta){
+  scaled <- dta
+  for(i in 1:ncol(dta)){
+    s <- sd(dta[,i])
+    for(j in 1:nrow(dta)){
+      scaled[j,i] <- dta[j,i]/s
+    }
+  }
+  return(scaled)
+}
