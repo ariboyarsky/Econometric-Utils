@@ -51,3 +51,35 @@ log.logit <- function(X,Y){
 }
 ##############################################################################
 ##############################################################################
+
+##############################################################################
+# Mutliple Linear Regression
+# Homoskedastic Std Errors (todo: add option for asymptotically consistent SE)
+##############################################################################
+linreg <- function(Y, X, con = 1){
+  # get stuff as matricies
+  Y <- as.matrix(Y)
+  
+  if(con == 1){
+    X <- as.matrix(cbind(1,X))
+  }else{
+    X <- as.matrix(X)
+  }
+
+  
+  # helpers
+  XtX <- t(X)%*%X
+  XtY <- t(X)%*%Y
+  
+  beta <- solve(XtX)%*%XtY
+  
+  # get SE
+  pred <- X%*%beta
+  n <- NROW(X)
+  sigma2 <- sum((Y-pred)^2) / (nrow(X)-ncol(X))
+  SE <- sqrt(diag(solve(XtX)*sigma2))
+  
+  return(list("beta"=beta,"SE"=SE))
+}
+##############################################################################
+##############################################################################
