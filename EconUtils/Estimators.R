@@ -66,8 +66,8 @@ log.logit <- function(X,Y){
 ##############################################################################
 
 # Mutliple Linear Regression
-# Homoskedastic Std Errors (todo: add option for asymptotically consistent SE)
-linreg <- function(Y, X, con = 1){
+# Options for weighted lest squares, robust se, and constant
+linreg <- function(Y, X, con = 1, weights = NULL, hetero = TRUE){
   # get stuff as matricies
   Y <- as.matrix(Y)
   
@@ -76,27 +76,43 @@ linreg <- function(Y, X, con = 1){
   }else{
     X <- as.matrix(X)
   }
-
   
-  # helpers
-  XtX <- t(X)%*%X
-  XtY <- t(X)%*%Y
+  # If weights submitted then calculate weighted OLS
+  if(!is.null(weights)){
+    W <- unlist(c(weights))
+  } else{
+    W <- replicate(nrow(X), 1)
+  }
+  XW <- X * W
   
-  beta <- solve(XtX)%*%XtY
+  # remove any 0 cols
+  X <-X[, colSums(X != 0) > 0]
+  XW <-XW[, colSums(XW != 0) > 0]
   
-  # get SE
+  beta <- solve(t(XW) %*% X)%*%t(XW)%*%Y
+  
+  # residuals
   pred <- X%*%beta
   n <- NROW(X)
-  sigma2 <- sum((Y-pred)^2) / (nrow(X)-ncol(X))
-  SE <- sqrt(diag(solve(XtX)*sigma2))
+  k <- ncol(X)
+  U <- Y - pred
+  
+  # get SE
+  if(hetero == FALSE){
+    sigma2 <- sum((Y-pred)^2) / (n-k)
+    SE <- sqrt(diag(solve(t(XW)%*%X)*sigma2))
+  }else{
+    Omega <- Diagonal(length(U) ,as.numeric(U ^ 2))
+    V <-  solve(t(XW) %*% X) %*% t(XW) %*% Omega %*% X %*% solve(t(XW) %*% X)
+    SE <- sqrt(diag(V))
+  }
+  
   
   return(list("beta"=beta,"SE"=SE))
 }
 ##############################################################################
 ##############################################################################
 # IV Regression (2SLS) 
-# Consider adding asymptotically consistent SE
-# ^Doing so yields a memory issue in R with the Angrist data???
 ols.iv <- function(Y,Z,X,controls, con = 1){
   if (con==1){
     controls <- as.matrix(cbind(1, controls))
@@ -131,11 +147,12 @@ ols.iv <- function(Y,Z,X,controls, con = 1){
   
   beta.iv <- solve(t(pred)%*%pred)%*%t(pred)%*%Y
   
-  # se
+  # robust se
   p2 <- pred%*%beta.iv
-  n <- NROW(X)
-  sigma2 <- sum((Y-p2)^2) / (nrow(pred)-ncol(pred))
-  SE <- sqrt(diag(solve(t(pred)%*%pred)*sigma2))
+  U <- Y - p2
+  Omega <- Diagonal(length(U) ,as.numeric(U ^ 2))
+  V = solve(t(pred)%*%pred)%*%t(pred)%*%Omega%*%pred%*%solve(t(pred)%*%pred)
+  SE <- sqrt(diag(V))
   
   return(list("beta.iv"=beta.iv, "beta.first"=beta.first, "SE"=SE))
 }
