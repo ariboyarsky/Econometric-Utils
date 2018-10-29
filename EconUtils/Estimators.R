@@ -9,6 +9,12 @@
 ##############################################################################
 
 log.logit <- function(X,Y){
+  X <- as.matrix(X)
+  Y <- as.matrix(Y)
+  
+  # drop all 0 cols in X
+  X <-X[, colSums(X != 0) > 0]
+  
   # get start values by ols to speed up process
   startvalues <- solve(t(X)%*%X)%*%t(X)%*%Y
   
@@ -47,7 +53,14 @@ log.logit <- function(X,Y){
                       control=list(trace=FALSE, REPORT=1), 
                       method="BFGS", hessian=TRUE)
   
-  return(logitmodel)
+  # return pred values too
+  logit.coeffs <- logitmodel$par
+  
+  # get predicted values
+  pred <- X%*%logit.coeffs
+  P <- exp(pred)/(1+exp(pred))
+  
+  return(list("Model"=logitmodel, "Pred"=P))
 }
 ##############################################################################
 ##############################################################################
