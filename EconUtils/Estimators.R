@@ -111,8 +111,8 @@ linreg <- function(Y, X, con = 1, weights = NULL, hetero = TRUE){
 }
 ##############################################################################
 ##############################################################################
-# IV Regression (2SLS) 
-ols.iv <- function(Y,Z,X,controls, con = 1){
+# IV Regression (TSLS) 
+ols.tsls <- function(Y,Z,X,controls, con = 1){
   if (con==1){
     controls <- as.matrix(cbind(1, controls))
   }else{
