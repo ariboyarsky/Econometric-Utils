@@ -107,8 +107,7 @@ linreg <- function(Y, X, con = 1, weights = NULL, hetero = TRUE){
     SE <- sqrt(diag(V))
   }
   
-  
-  return(list("beta"=beta,"SE"=SE))
+  return(list("beta"=beta,"SE"=SE,"res"=U))
 }
 ##############################################################################
 ##############################################################################
