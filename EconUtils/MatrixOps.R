@@ -20,3 +20,27 @@ my.svd <- function(dta){
   
   return(list("U"= U, "V"= V, "S"= S))
 }
+
+# Demean using Mean Matrix
+mat.demean <- function(dta){
+  D <- as.matrix(dta)
+  n <- NROW(D)
+  O <- matrix(1, nrow=n, ncol=n)
+  C <- diag(n) - (1 / n) * O
+  return(as.matrix(C)%*%as.matrix(D))
+}
+
+# Angle between vectors
+vector_angle <- function(a,b){
+  theta <- acos( sum(a*b) / ( sqrt(sum(a * a)) * sqrt(sum(b * b)) ) )
+  return(theta)
+}
+
+# Find inverse of square matrix (must be positive definite -- admit to EVD)
+inv.sq <- function(A){
+  evd <- eigen(A)
+  D <- diag(sqrt(evd$values))
+  Q <- evd$vectors
+  B <- solve(Q%*%D%*%t(Q))
+  return(B)
+}
