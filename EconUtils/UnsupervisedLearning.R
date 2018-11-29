@@ -5,6 +5,12 @@
 #
 # Author: Ari Boyarsky (aboyarsky@uchicago.edu)
 
+# Set working dir to current dir
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Load Matrix Ops Functions
+source("MatrixOps.R")
+
 #---------
 # Factor Analysis
 #---------
