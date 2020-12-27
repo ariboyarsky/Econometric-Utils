@@ -44,3 +44,12 @@ inv.sq <- function(A){
   B <- solve(Q%*%D%*%t(Q))
   return(B)
 }
+
+# find X bar (mean) matrix
+mean.mat <- function(X){
+  X <- as.matrix(X)
+  X_bar <- (1/NROW(X)) * t(X) %*% matrix(1, nrow = NROW(X), ncol = NCOL(X))
+  
+  return(X_bar)
+  
+}
